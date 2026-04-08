@@ -1,98 +1,405 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+// app/(tabs)/index.tsx
+// Home screen — shows recently played, recommended tracks, and popular playlists.
+// Fetches real data from Deezer's public chart and search endpoints (no auth needed).
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import PlaylistCard from "../../components/PlaylistCard";
+import TrackItem from "../../components/TrackItem";
+import {
+  Colors,
+  Layout,
+  Radii,
+  Spacing,
+  Typography,
+} from "../../constants/theme";
+import { DeezerAPI, DeezerPlaylist, DeezerTrack } from "../../services/deezer";
+import { usePlayerStore } from "../../store/playerStore";
+
+// ─── Component ────────────────────────────────────────────────────────────────
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const insets = useSafeAreaInsets();
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  // ── Local state ──
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<DeezerTrack[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+
+  const [chartTracks, setChartTracks] = useState<DeezerTrack[]>([]);
+  const [popularPlaylists, setPopularPlaylists] = useState<DeezerPlaylist[]>(
+    [],
+  );
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // ── Player store ──
+  const { currentTrack } = usePlayerStore();
+
+  // ── Fetch chart data on mount ──
+  useEffect(() => {
+    const fetchHomeData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        // Fetch chart tracks and playlists in parallel
+        const [tracksRes, playlistsRes] = await Promise.all([
+          DeezerAPI.getChartTracks(10),
+          DeezerAPI.getChartPlaylists(6),
+        ]);
+
+        setChartTracks(tracksRes.data);
+        setPopularPlaylists(playlistsRes.data);
+      } catch (err) {
+        setError("Failed to load music. Check your connection.");
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchHomeData();
+  }, []);
+
+  // ── Search handler — fires as user types ──
+  useEffect(() => {
+    // Don't search if query is too short
+    if (searchQuery.length < 2) {
+      setSearchResults([]);
+      setIsSearching(false);
+      return;
+    }
+
+    // Debounce — wait 500ms after user stops typing before searching
+    const timer = setTimeout(async () => {
+      try {
+        setIsSearching(true);
+        const res = await DeezerAPI.searchTracks(searchQuery, 15);
+        setSearchResults(res.data);
+      } catch (err) {
+        console.error("Search error:", err);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 500);
+
+    // Cleanup — cancel the timer if user types again before 500ms
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // ─── Loading state ───────────────────────────────────────────────────────────
+  if (isLoading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+        <Text style={styles.loadingText}>Loading music...</Text>
+      </View>
+    );
+  }
+
+  // ─── Error state ─────────────────────────────────────────────────────────────
+  if (error) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.errorText}>{error}</Text>
+        <TouchableOpacity
+          style={styles.retryButton}
+          onPress={() => setIsLoading(true)}
+        >
+          <Text style={styles.retryText}>Retry</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  // ─── Main render ─────────────────────────────────────────────────────────────
+  return (
+    <View style={styles.screen}>
+      <StatusBar barStyle="light-content" />
+
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={[
+          styles.scrollContent,
+          {
+            paddingTop: insets.top + Spacing.md,
+            // Extra bottom padding so last item isn't hidden behind MiniPlayer
+            paddingBottom: Layout.bottomInset + Spacing.xl,
+          },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* ── Header ── */}
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.greeting}>Good evening 👋</Text>
+            <Text style={styles.appName}>SoundWave</Text>
+          </View>
+          <TouchableOpacity style={styles.avatarButton}>
+            <Text style={styles.avatarText}>SW</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* ── Search bar ── */}
+        <View style={styles.searchContainer}>
+          <Text style={styles.searchIcon}>🔍</Text>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search songs, artists..."
+            placeholderTextColor={Colors.textMuted}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            returnKeyType="search"
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchQuery("")}>
+              <Text style={styles.clearIcon}>✕</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* ── Search results (shown when user is searching) ── */}
+        {searchQuery.length >= 2 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              {isSearching ? "Searching..." : `Results for "${searchQuery}"`}
+            </Text>
+            {isSearching ? (
+              <ActivityIndicator
+                color={Colors.primary}
+                style={styles.searchSpinner}
+              />
+            ) : searchResults.length === 0 ? (
+              <Text style={styles.emptyText}>No results found</Text>
+            ) : (
+              searchResults.map((track) => (
+                <TrackItem key={track.id} track={track} queue={searchResults} />
+              ))
+            )}
+          </View>
+        )}
+
+        {/* ── Main content (hidden while searching) ── */}
+        {searchQuery.length < 2 && (
+          <>
+            {/* ── Recently Played ── */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Recently Played</Text>
+              {chartTracks.slice(0, 3).map((track) => (
+                <TrackItem key={track.id} track={track} queue={chartTracks} />
+              ))}
+            </View>
+
+            {/* ── Recommended for You ── */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>Recommended for You</Text>
+                <TouchableOpacity>
+                  <Text style={styles.seeAll}>See all</Text>
+                </TouchableOpacity>
+              </View>
+              {chartTracks.slice(3, 7).map((track) => (
+                <TrackItem key={track.id} track={track} queue={chartTracks} />
+              ))}
+            </View>
+
+            {/* ── Popular Playlists ── */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>Popular Playlists</Text>
+                <TouchableOpacity>
+                  <Text style={styles.seeAll}>See all</Text>
+                </TouchableOpacity>
+              </View>
+              {/* Horizontal scroll row of playlist cards */}
+              <FlatList
+                data={popularPlaylists}
+                keyExtractor={(item) => String(item.id)}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.playlistRow}
+                renderItem={({ item }) => (
+                  <PlaylistCard
+                    item={item}
+                    size="small"
+                    onPress={() => console.log("Playlist pressed:", item.title)}
+                  />
+                )}
+              />
+            </View>
+          </>
+        )}
+      </ScrollView>
+    </View>
   );
 }
 
+// ─── Styles ───────────────────────────────────────────────────────────────────
+
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  screen: {
+    flex: 1,
+    backgroundColor: Colors.background,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+
+  scroll: {
+    flex: 1,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+
+  scrollContent: {
+    gap: Spacing.xl,
+  },
+
+  // ── Loading / Error states ──
+  centered: {
+    flex: 1,
+    backgroundColor: Colors.background,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: Spacing.md,
+  },
+
+  loadingText: {
+    color: Colors.textSecondary,
+    fontSize: Typography.md,
+  },
+
+  errorText: {
+    color: Colors.error,
+    fontSize: Typography.md,
+    textAlign: "center",
+    paddingHorizontal: Spacing.xl,
+  },
+
+  retryButton: {
+    backgroundColor: Colors.primary,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.md,
+    borderRadius: Radii.full,
+  },
+
+  retryText: {
+    color: Colors.textPrimary,
+    fontWeight: Typography.semibold,
+    fontSize: Typography.md,
+  },
+
+  // ── Header ──
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: Spacing.lg,
+  },
+
+  greeting: {
+    fontSize: Typography.sm,
+    color: Colors.textSecondary,
+  },
+
+  appName: {
+    fontSize: Typography.xxl,
+    color: Colors.textPrimary,
+    fontWeight: Typography.extrabold,
+  },
+
+  avatarButton: {
+    width: 40,
+    height: 40,
+    borderRadius: Radii.full,
+    backgroundColor: Colors.primary,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  avatarText: {
+    color: Colors.textPrimary,
+    fontWeight: Typography.bold,
+    fontSize: Typography.sm,
+  },
+
+  // ── Search ──
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.surface,
+    marginHorizontal: Spacing.lg,
+    borderRadius: Radii.full,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    gap: Spacing.sm,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+
+  searchIcon: {
+    fontSize: 16,
+  },
+
+  searchInput: {
+    flex: 1,
+    color: Colors.textPrimary,
+    fontSize: Typography.md,
+    paddingVertical: 0, // removes default Android padding
+  },
+
+  clearIcon: {
+    color: Colors.textMuted,
+    fontSize: 14,
+    paddingHorizontal: Spacing.xs,
+  },
+
+  searchSpinner: {
+    marginTop: Spacing.lg,
+  },
+
+  // ── Sections ──
+  section: {
+    gap: Spacing.sm,
+  },
+
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: Spacing.lg,
+  },
+
+  sectionTitle: {
+    fontSize: Typography.lg,
+    color: Colors.textPrimary,
+    fontWeight: Typography.bold,
+    paddingHorizontal: Spacing.lg,
+  },
+
+  seeAll: {
+    fontSize: Typography.sm,
+    color: Colors.primary,
+    fontWeight: Typography.medium,
+  },
+
+  emptyText: {
+    color: Colors.textMuted,
+    fontSize: Typography.md,
+    textAlign: "center",
+    paddingVertical: Spacing.xl,
+  },
+
+  // ── Playlist row ──
+  playlistRow: {
+    paddingHorizontal: Spacing.lg,
+    gap: Spacing.md,
   },
 });

@@ -1,53 +1,84 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
-
-import { Platform } from 'react-native';
-
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+// constants/theme.ts
+// Central design system — all colors, typography, spacing, and radii
+// Import this wherever you need consistent styling across the app
 
 export const Colors = {
-  light: {
-    text: '#11181C',
-    background: '#fff',
-    tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
-  },
-  dark: {
-    text: '#ECEDEE',
-    background: '#151718',
-    tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
-  },
+  // Core backgrounds (matches dark Figma design)
+  background: "#0D0D0D", // deepest background
+  surface: "#1A1A1A", // cards, list items
+  surfaceAlt: "#222222", // slightly lighter surface (inputs, toggles bg)
+  elevated: "#2A2A2A", // modals, bottom sheets
+
+  // Brand / accent
+  primary: "#7C4DFF", // purple — buttons, active states, progress bar
+  primaryDark: "#5B2ECC", // pressed / darker purple
+  primaryGlow: "rgba(124, 77, 255, 0.25)", // glow effect behind album art etc.
+
+  // Text
+  textPrimary: "#FFFFFF", // main text
+  textSecondary: "#A0A0A0", // subtitles, metadata
+  textMuted: "#555555", // placeholders, disabled
+
+  // UI elements
+  border: "#2C2C2C", // dividers, card borders
+  icon: "#A0A0A0", // inactive icons
+  iconActive: "#FFFFFF", // active tab icons
+
+  // Semantic
+  success: "#4CAF50",
+  error: "#F44336",
+
+  // Gradients (used with expo-linear-gradient)
+  gradientNowPlaying: ["#1A0533", "#0D0D0D"] as const,
+  gradientCard: ["rgba(0,0,0,0)", "rgba(0,0,0,0.85)"] as const,
+  gradientTabBar: ["rgba(13,13,13,0)", "rgba(13,13,13,1)"] as const,
 };
 
-export const Fonts = Platform.select({
-  ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
-  },
-  default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
-  },
-  web: {
-    sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-    serif: "Georgia, 'Times New Roman', serif",
-    rounded: "'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif",
-    mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
-  },
-});
+export const Typography = {
+  // Font sizes
+  xs: 11,
+  sm: 13,
+  md: 15,
+  lg: 17,
+  xl: 20,
+  xxl: 24,
+  display: 32,
+
+  // Font weights (React Native uses string values)
+  regular: "400" as const,
+  medium: "500" as const,
+  semibold: "600" as const,
+  bold: "700" as const,
+  extrabold: "800" as const,
+
+  // Line heights
+  tight: 1.2,
+  normal: 1.5,
+  relaxed: 1.75,
+};
+
+export const Spacing = {
+  xs: 4,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 20,
+  xxl: 24,
+  xxxl: 32,
+  section: 40,
+};
+
+export const Radii = {
+  sm: 6,
+  md: 10,
+  lg: 14,
+  xl: 20,
+  full: 999,
+};
+
+export const Layout = {
+  tabBarHeight: 64,
+  miniPlayerHeight: 64,
+  bottomInset: 90, // miniPlayer + some padding — used to offset FlatList contentInset
+  screenPadding: 16,
+};
