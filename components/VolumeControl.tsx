@@ -1,0 +1,84 @@
+import React from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Colors, Radii, Spacing, Typography } from "../constants/theme";
+
+interface VolumeControlProps {
+  value: number;
+  onChange: (volume: number) => void;
+}
+
+const STEPS = 10;
+
+export default function VolumeControl({ value, onChange }: VolumeControlProps) {
+  const activeSteps = Math.round(value * STEPS);
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.label}>Volume</Text>
+        <Text style={styles.value}>{Math.round(value * 100)}%</Text>
+      </View>
+
+      <View style={styles.track}>
+        {Array.from({ length: STEPS + 1 }).map((_, index) => {
+          const stepValue = index / STEPS;
+          const isActive = index <= activeSteps;
+
+          return (
+            <Pressable
+              key={String(index)}
+              style={[styles.step, isActive && styles.stepActive]}
+              onPress={() => onChange(stepValue)}
+            />
+          );
+        })}
+      </View>
+      <View style={styles.legendRow}>
+        <Text style={styles.legend}>Low</Text>
+        <Text style={styles.legend}>High</Text>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    gap: Spacing.sm,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  label: {
+    color: Colors.textPrimary,
+    fontSize: Typography.md,
+    fontWeight: Typography.semibold,
+  },
+  value: {
+    color: Colors.primary,
+    fontSize: Typography.sm,
+    fontWeight: Typography.semibold,
+  },
+  track: {
+    flexDirection: "row",
+    gap: 6,
+  },
+  step: {
+    flex: 1,
+    height: 12,
+    borderRadius: Radii.full,
+    backgroundColor: Colors.surfaceAlt,
+  },
+  stepActive: {
+    backgroundColor: Colors.primary,
+  },
+  legendRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  legend: {
+    color: Colors.textSecondary,
+    fontSize: Typography.xs,
+  },
+});
