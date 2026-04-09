@@ -1,30 +1,15 @@
-// components/TrackItem.tsx
-// A single track row — used in Home, Library, Search, and Playlist screens.
-// Shows album art, track title, artist name, duration, and a play indicator.
-
 import React from "react";
-import {
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-} from "react-native";
-import { DeezerTrack, formatDuration } from "../services/deezer";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Colors, Radii, Spacing, Typography } from "../constants/theme";
+import { formatDuration, Song } from "../data/songs";
 import { usePlayerStore } from "../store/playerStore";
-import { Colors, Typography, Spacing, Radii } from "../constants/theme";
-
-// ─── Props ────────────────────────────────────────────────────────────────────
 
 interface TrackItemProps {
-  track: DeezerTrack;
-  queue?: DeezerTrack[]; // the list this track belongs to (for queueing)
-  showNumber?: number; // optional track number shown instead of album art
-  onPress?: () => void; // override default play behavior if needed
+  track: Song;
+  queue?: Song[];
+  showNumber?: number;
+  onPress?: () => void;
 }
-
-// ─── Component ────────────────────────────────────────────────────────────────
 
 export default function TrackItem({
   track,
@@ -32,10 +17,7 @@ export default function TrackItem({
   showNumber,
   onPress,
 }: TrackItemProps) {
-  // Read player state from global store
-  const { currentTrack, isPlaying, isLoading, playTrack } = usePlayerStore();
-
-  // Is THIS track the one currently loaded in the player?
+  const { currentTrack, isPlaying, playTrack } = usePlayerStore();
   const isCurrentTrack = currentTrack?.id === track.id;
 
   const handlePress = () => {
@@ -43,58 +25,30 @@ export default function TrackItem({
       onPress();
       return;
     }
-    // Play this track, passing the full queue so next/prev work
     playTrack(track, queue ?? [track]);
   };
 
   return (
-    <TouchableOpacity
-      style={[
-        styles.container,
-        // Highlight the row if this track is currently playing
-        isCurrentTrack && styles.activeContainer,
-      ]}
+    <Pressable
+      style={[styles.container, isCurrentTrack && styles.activeContainer]}
       onPress={handlePress}
-      activeOpacity={0.7}
     >
-      {/* Left side — either a track number or album art */}
       {showNumber !== undefined ? (
         <View style={styles.numberContainer}>
-          {isCurrentTrack && isPlaying ? (
-            // Animated bars icon when playing — we fake it with colored dots
-            <View style={styles.playingIndicator}>
-              <View style={[styles.bar, styles.bar1]} />
-              <View style={[styles.bar, styles.bar2]} />
-              <View style={[styles.bar, styles.bar3]} />
-            </View>
-          ) : (
-            <Text
-              style={[styles.trackNumber, isCurrentTrack && styles.activeText]}
-            >
-              {showNumber}
-            </Text>
-          )}
+          <Text
+            style={[styles.trackNumber, isCurrentTrack && styles.activeText]}
+          >
+            {isCurrentTrack && isPlaying ? "▶" : showNumber}
+          </Text>
         </View>
       ) : (
         <View style={styles.artContainer}>
-          <Image
-            source={{ uri: track.album.cover_small }}
-            style={styles.albumArt}
-          />
-          {/* Loading spinner overlay when this track is loading */}
-          {isCurrentTrack && isLoading && (
-            <View style={styles.loadingOverlay}>
-              <ActivityIndicator size="small" color={Colors.primary} />
-            </View>
-          )}
-          {/* Purple tint overlay when this track is active */}
-          {isCurrentTrack && !isLoading && (
-            <View style={styles.activeOverlay} />
-          )}
+          <View style={[styles.albumArt, isCurrentTrack && styles.activeArt]}>
+            <Text style={styles.albumLetter}>{track.title.charAt(0)}</Text>
+          </View>
         </View>
       )}
 
-      {/* Middle — title and artist */}
       <View style={styles.info}>
         <Text
           style={[styles.title, isCurrentTrack && styles.activeText]}
@@ -103,34 +57,29 @@ export default function TrackItem({
           {track.title}
         </Text>
         <Text style={styles.artist} numberOfLines={1}>
-          {track.artist.name}
+          {track.artist}
         </Text>
       </View>
 
-      {/* Right side — duration */}
       <Text style={styles.duration}>{formatDuration(track.duration)}</Text>
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
-
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "row", // lay children left to right
-    alignItems: "center", // vertically center everything
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.sm,
-    gap: Spacing.md, // space between each child
+    gap: Spacing.md,
   },
 
-  // Subtle purple tint on the active row
   activeContainer: {
     backgroundColor: Colors.primaryGlow,
     borderRadius: Radii.md,
   },
 
-  // ── Track number (used in playlist detail view) ──
   numberContainer: {
     width: 32,
     alignItems: "center",
@@ -143,53 +92,31 @@ const styles = StyleSheet.create({
     fontWeight: Typography.medium,
   },
 
-  // ── Playing indicator (3 animated bars) ──
-  playingIndicator: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    gap: 2,
-    height: 16,
-  },
-
-  bar: {
-    width: 3,
-    backgroundColor: Colors.primary,
-    borderRadius: 2,
-  },
-
-  bar1: { height: 10 },
-  bar2: { height: 16 },
-  bar3: { height: 7 },
-
-  // ── Album art ──
   artContainer: {
-    position: "relative", // so overlays can position absolutely inside
+    position: "relative",
   },
 
   albumArt: {
     width: 48,
     height: 48,
-    borderRadius: Radii.sm,
-    backgroundColor: Colors.surface,
-  },
-
-  loadingOverlay: {
-    ...StyleSheet.absoluteFillObject, // covers the whole albumArt
-    backgroundColor: "rgba(0,0,0,0.5)",
-    borderRadius: Radii.sm,
-    justifyContent: "center",
+    borderRadius: Radii.md,
+    backgroundColor: Colors.surfaceAlt,
     alignItems: "center",
+    justifyContent: "center",
   },
 
-  activeOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: Colors.primaryGlow,
-    borderRadius: Radii.sm,
+  activeArt: {
+    backgroundColor: Colors.primaryDark,
   },
 
-  // ── Text info ──
+  albumLetter: {
+    color: Colors.textPrimary,
+    fontSize: Typography.md,
+    fontWeight: Typography.bold,
+  },
+
   info: {
-    flex: 1, // takes up all remaining horizontal space
+    flex: 1,
     gap: 3,
   },
 
@@ -208,11 +135,10 @@ const styles = StyleSheet.create({
   duration: {
     fontSize: Typography.sm,
     color: Colors.textMuted,
-    minWidth: 36, // keeps alignment consistent across rows
+    minWidth: 40,
     textAlign: "right",
   },
 
-  // Purple color for active track text
   activeText: {
     color: Colors.primary,
   },
