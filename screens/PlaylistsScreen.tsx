@@ -39,9 +39,7 @@ export default function PlaylistsScreen() {
         ListHeaderComponent={
           <View style={styles.header}>
             <Text style={styles.title}>Playlists</Text>
-            <Text style={styles.subtitle}>
-              Saved locally with AsyncStorage.
-            </Text>
+            <Text style={styles.subtitle}>Saved on this device.</Text>
             <Pressable style={styles.createButton}>
               <Text style={styles.createButtonText}>+ Create Playlist</Text>
             </Pressable>

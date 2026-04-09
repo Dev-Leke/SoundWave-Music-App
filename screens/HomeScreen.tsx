@@ -75,7 +75,7 @@ export default function HomeScreen() {
           <Text style={styles.kicker}>SoundWave</Text>
           <Text style={styles.title}>Good evening</Text>
           <Text style={styles.subtitle}>
-            Find music, open playlists, and keep playback pinned below.
+            Browse the library and keep playback handy.
           </Text>
         </View>
         <View style={styles.heroIcon}>
@@ -101,7 +101,7 @@ export default function HomeScreen() {
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>
-          {searchQuery ? "Search Results" : "Recently Played"}
+          {searchQuery ? "Search Results" : "Recent Songs"}
         </Text>
         {(searchQuery
           ? displaySongs
@@ -121,7 +121,7 @@ export default function HomeScreen() {
 
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Recommended for You</Text>
+          <Text style={styles.sectionTitle}>Suggested Tracks</Text>
           <Text style={styles.sectionAction}>See all</Text>
         </View>
         {SONGS.slice(4, 8).map((song, index) => (
@@ -137,7 +137,7 @@ export default function HomeScreen() {
 
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Popular Playlists</Text>
+          <Text style={styles.sectionTitle}>Playlists</Text>
           <Text style={styles.sectionAction}>See all</Text>
         </View>
         <FlatList
@@ -161,9 +161,7 @@ export default function HomeScreen() {
         onPress={() => navigation.navigate("Library")}
       >
         <Text style={styles.actionTitle}>Open Library</Text>
-        <Text style={styles.actionSubtitle}>
-          Browse all songs in the collection.
-        </Text>
+        <Text style={styles.actionSubtitle}>See the full song list.</Text>
       </Pressable>
     </ScrollView>
   );
@@ -215,7 +213,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: Radii.full,
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.primaryDark,
     alignItems: "center",
     justifyContent: "center",
   },

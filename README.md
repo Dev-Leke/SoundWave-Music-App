@@ -1,6 +1,6 @@
 # SoundWave Music Player
 
-SoundWave is a simple Expo React Native music player built for a college project. It uses bottom tabs, a stack for Now Playing, a persistent mini player, and local storage for playlists and recently played songs.
+SoundWave is a lightweight Expo React Native music player. It uses bottom tabs, a stack for Now Playing, a persistent mini player, and local storage for playlists and recently played songs.
 
 ## Run It
 
@@ -20,5 +20,5 @@ npx expo start --android
 
 ## Notes
 
-- The app is intended to be shared with the project team for testing and feedback.
+- The app is intended to be shared with the team for testing and feedback.
 - If you are working on Android, you can run it in an emulator or on a USB-connected device.

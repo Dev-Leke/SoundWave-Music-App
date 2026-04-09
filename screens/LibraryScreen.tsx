@@ -39,7 +39,7 @@ export default function LibraryScreen() {
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <View style={styles.header}>
         <Text style={styles.title}>Library</Text>
-        <Text style={styles.subtitle}>Browse songs, albums, and artists.</Text>
+        <Text style={styles.subtitle}>Your songs, albums, and artists.</Text>
       </View>
 
       <View style={styles.segmentBar}>
@@ -80,9 +80,7 @@ export default function LibraryScreen() {
                 />
               ))
           ) : (
-            <Text style={styles.emptyText}>
-              Recently played songs will appear here.
-            </Text>
+            <Text style={styles.emptyText}>Recently played songs will show here.</Text>
           )}
 
           <Text style={styles.sectionTitle}>All Songs</Text>

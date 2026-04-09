@@ -1,6 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import {
   Pressable,
@@ -11,7 +10,6 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors, Layout, Radii, Spacing, Typography } from "../constants/theme";
-import { formatDuration } from "../data/songs";
 import { usePlayerStore } from "../store/playerStore";
 
 export default function MiniPlayer() {
@@ -21,15 +19,12 @@ export default function MiniPlayer() {
     currentTrack,
     isPlaying,
     progress,
-    duration,
     togglePlay,
     previous,
     next,
   } = usePlayerStore();
 
   if (!currentTrack) return null;
-
-  const elapsed = Math.round((progress / 100) * duration);
 
   return (
     <View
@@ -39,10 +34,6 @@ export default function MiniPlayer() {
       ]}
     >
       <View style={styles.container}>
-        <LinearGradient
-          colors={["rgba(58, 34, 100, 0.98)", "rgba(17, 13, 28, 0.98)"]}
-          style={StyleSheet.absoluteFill}
-        />
         <View style={styles.progressTrack}>
           <View style={[styles.progressFill, { width: `${progress}%` }]} />
         </View>
@@ -91,7 +82,6 @@ export default function MiniPlayer() {
             </TouchableOpacity>
           </View>
         </View>
-        <Text style={styles.timeLabel}>{formatDuration(elapsed)}</Text>
       </View>
     </View>
   );
@@ -105,17 +95,18 @@ const styles = StyleSheet.create({
     zIndex: 100,
     borderRadius: Radii.xl,
     overflow: "hidden",
-    shadowColor: Colors.primary,
+    shadowColor: "#000000",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
     // Shadow for Android
-    elevation: 12,
+    elevation: 8,
   },
 
   container: {
     borderRadius: Radii.xl,
     overflow: "hidden",
+    backgroundColor: Colors.surface,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.08)",
   },
@@ -179,7 +170,6 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
   },
 
-  // ── Controls ──
   controls: {
     flexDirection: "row",
     alignItems: "center",
@@ -204,11 +194,4 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  timeLabel: {
-    position: "absolute",
-    right: Spacing.md,
-    bottom: 4,
-    fontSize: 10,
-    color: Colors.textMuted,
-  },
 });

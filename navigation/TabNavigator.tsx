@@ -120,8 +120,8 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.xs,
   },
   tabBar: {
-    backgroundColor: "rgba(28, 22, 40, 0.96)",
-    borderRadius: 22,
+    backgroundColor: "rgba(24, 24, 24, 0.98)",
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.08)",
     flexDirection: "row",
@@ -129,11 +129,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.xs,
-    shadowColor: Colors.primary,
-    shadowOpacity: 0.18,
-    shadowRadius: 18,
+    shadowColor: "#000000",
+    shadowOpacity: 0.16,
+    shadowRadius: 14,
     shadowOffset: { width: 0, height: 8 },
-    elevation: 14,
+    elevation: 10,
   },
   tabButton: {
     flex: 1,
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   iconPillActive: {
-    backgroundColor: Colors.primaryGlow,
+    backgroundColor: "rgba(124, 77, 255, 0.15)",
   },
   tabLabel: {
     fontSize: 10,

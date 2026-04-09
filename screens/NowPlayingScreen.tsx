@@ -52,12 +52,14 @@ export default function NowPlayingScreen() {
       </View>
 
       <View style={styles.artwork}>
-        <LinearGradient
-          colors={["#B88CFF", "#5B2ECC"]}
-          style={styles.artworkGlow}
-        />
-        <View style={styles.artworkDisc}>
-          <Text style={styles.artworkText}>{currentTrack.title.charAt(0)}</Text>
+        <View style={styles.artworkFrame}>
+          <LinearGradient
+            colors={Colors.gradientNowPlaying}
+            style={styles.artworkGlow}
+          />
+          <View style={styles.artworkDisc}>
+            <Text style={styles.artworkText}>{currentTrack.title.charAt(0)}</Text>
+          </View>
         </View>
       </View>
 
@@ -106,9 +108,7 @@ export default function NowPlayingScreen() {
 
       <View style={styles.footerCard}>
         <Text style={styles.footerLabel}>Queue</Text>
-        <Text style={styles.footerValue}>
-          {currentTrack ? "Playing from your current queue" : "No queue loaded"}
-        </Text>
+        <Text style={styles.footerValue}>From your queue</Text>
       </View>
     </LinearGradient>
   );
@@ -147,26 +147,34 @@ const styles = StyleSheet.create({
     width: "100%",
     aspectRatio: 1,
     borderRadius: Radii.xl,
-    backgroundColor: "rgba(255,255,255,0.03)",
     alignItems: "center",
     justifyContent: "center",
     position: "relative",
     overflow: "hidden",
   },
+  artworkFrame: {
+    width: "100%",
+    height: "100%",
+    borderRadius: Radii.xl,
+    backgroundColor: "rgba(255,255,255,0.04)",
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+  },
   artworkGlow: {
     position: "absolute",
-    top: 24,
-    left: 24,
-    right: 24,
-    bottom: 24,
+    top: 36,
+    left: 36,
+    right: 36,
+    bottom: 36,
     borderRadius: Radii.xl,
-    opacity: 0.55,
+    opacity: 0.45,
   },
   artworkDisc: {
-    width: "78%",
+    width: "72%",
     aspectRatio: 1,
     borderRadius: Radii.xl,
-    backgroundColor: "rgba(8,8,14,0.95)",
+    backgroundColor: "rgba(10,10,18,0.96)",
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
@@ -174,7 +182,7 @@ const styles = StyleSheet.create({
   },
   artworkText: {
     color: Colors.textPrimary,
-    fontSize: 72,
+    fontSize: 68,
     fontWeight: Typography.extrabold,
   },
   trackMeta: {

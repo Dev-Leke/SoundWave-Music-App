@@ -54,9 +54,10 @@ export default function SettingsScreen() {
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Project</Text>
+        <Text style={styles.sectionTitle}>About</Text>
         <Text style={styles.supportingText}>
-          Expo React Native music player built for a college project.
+          SoundWave is a lightweight music player with saved playlists and a
+          persistent mini player.
         </Text>
       </View>
     </View>
