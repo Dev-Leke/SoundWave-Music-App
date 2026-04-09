@@ -1,14 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
-import {
-    BottomTabBarProps,
-    BottomTabNavigationOptions,
-    createBottomTabNavigator,
-} from "@react-navigation/bottom-tabs";
+import { BottomTabBarProps, createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import MiniPlayer from "../components/MiniPlayer";
-import { Colors, Layout, Spacing, Typography } from "../constants/theme";
+import { Colors, Spacing, Typography } from "../constants/theme";
 import HomeScreen from "../screens/HomeScreen";
 import LibraryScreen from "../screens/LibraryScreen";
 import PlaylistsScreen from "../screens/PlaylistsScreen";
@@ -68,25 +64,6 @@ const getTabIcon = (routeName: keyof TabParamList, focused: boolean) => {
 export default function TabNavigator() {
   const insets = useSafeAreaInsets();
 
-  const tabOptions = ({
-    route,
-  }: {
-    route: { name: keyof TabParamList };
-  }): BottomTabNavigationOptions => ({
-    headerShown: false,
-    tabBarActiveTintColor: Colors.primary,
-    tabBarInactiveTintColor: Colors.icon,
-    tabBarStyle: [
-      styles.tabBar,
-      {
-        height: Layout.tabBarHeight + insets.bottom,
-        paddingBottom: Math.max(insets.bottom, Spacing.sm),
-      },
-    ],
-    tabBarLabelStyle: styles.label,
-    tabBarIcon: ({ focused }) => getTabIcon(route.name, focused),
-  });
-
   const renderTabBar = ({ state, navigation }: BottomTabBarProps) => (
     <View
       style={[
@@ -121,7 +98,7 @@ export default function TabNavigator() {
 
   return (
     <View style={styles.container}>
-      <Tab.Navigator screenOptions={tabOptions} tabBar={renderTabBar}>
+      <Tab.Navigator screenOptions={{ headerShown: false }} tabBar={renderTabBar}>
         <Tab.Screen name="Home" component={HomeScreen} />
         <Tab.Screen name="Library" component={LibraryScreen} />
         <Tab.Screen name="Playlists" component={PlaylistsScreen} />
@@ -183,14 +160,5 @@ const styles = StyleSheet.create({
     height: 4,
     borderRadius: 2,
     backgroundColor: Colors.primary,
-  },
-  tabBarHidden: {
-    backgroundColor: Colors.surface,
-    borderTopColor: Colors.border,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    paddingTop: Spacing.sm,
-  },
-  label: {
-    fontSize: Typography.xs,
   },
 });

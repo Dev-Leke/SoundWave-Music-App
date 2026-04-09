@@ -1,17 +1,14 @@
 import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import { Colors, Radii, Spacing, Typography } from "../constants/theme";
+import { StyleSheet, Text, View } from "react-native";
+import Slider from "@react-native-community/slider";
+import { Colors, Spacing, Typography } from "../constants/theme";
 
 interface VolumeControlProps {
   value: number;
   onChange: (volume: number) => void;
 }
 
-const STEPS = 10;
-
 export default function VolumeControl({ value, onChange }: VolumeControlProps) {
-  const activeSteps = Math.round(value * STEPS);
-
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -19,20 +16,18 @@ export default function VolumeControl({ value, onChange }: VolumeControlProps) {
         <Text style={styles.value}>{Math.round(value * 100)}%</Text>
       </View>
 
-      <View style={styles.track}>
-        {Array.from({ length: STEPS + 1 }).map((_, index) => {
-          const stepValue = index / STEPS;
-          const isActive = index <= activeSteps;
+      <Slider
+        style={styles.slider}
+        minimumValue={0}
+        maximumValue={1}
+        step={0.01}
+        value={value}
+        onValueChange={onChange}
+        minimumTrackTintColor={Colors.primary}
+        maximumTrackTintColor={Colors.surfaceAlt}
+        thumbTintColor={Colors.textPrimary}
+      />
 
-          return (
-            <Pressable
-              key={String(index)}
-              style={[styles.step, isActive && styles.stepActive]}
-              onPress={() => onChange(stepValue)}
-            />
-          );
-        })}
-      </View>
       <View style={styles.legendRow}>
         <Text style={styles.legend}>Low</Text>
         <Text style={styles.legend}>High</Text>
@@ -60,18 +55,9 @@ const styles = StyleSheet.create({
     fontSize: Typography.sm,
     fontWeight: Typography.semibold,
   },
-  track: {
-    flexDirection: "row",
-    gap: 6,
-  },
-  step: {
-    flex: 1,
-    height: 12,
-    borderRadius: Radii.full,
-    backgroundColor: Colors.surfaceAlt,
-  },
-  stepActive: {
-    backgroundColor: Colors.primary,
+  slider: {
+    width: "100%",
+    height: 36,
   },
   legendRow: {
     flexDirection: "row",
